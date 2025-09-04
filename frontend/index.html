@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>루브릭 에이전트 - 자동 평가 시스템</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-clipboard-check"></i>
+                    <h1>루브릭 에이전트</h1>
+                </div>
+                <p class="subtitle">AI 기반 자동 평가 및 피드백 시스템</p>
+            </div>
+        </header>
+
+        <main class="main">
+            <div class="input-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-edit"></i> 평가 정보 입력</h2>
+                    </div>
+                    <div class="card-body">
+                        <form id="rubricForm">
+                            <div class="form-group">
+                                <label for="topic">주제</label>
+                                <input type="text" id="topic" name="topic" placeholder="예: 지구 문제에 우리는 어떻게 대처하는가?(환경문제)" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="objective">목적</label>
+                                <input type="text" id="objective" name="objective" placeholder="예: 환경 논제 글쓰기" required>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="grade_level">학년</label>
+                                    <select id="grade_level" name="grade_level" required>
+                                        <option value="">학년 선택</option>
+                                        <option value="1">초등학교 1학년</option>
+                                        <option value="2">초등학교 2학년</option>
+                                        <option value="3">초등학교 3학년</option>
+                                        <option value="4">초등학교 4학년</option>
+                                        <option value="5">초등학교 5학년</option>
+                                        <option value="6">초등학교 6학년</option>
+                                        <option value="7">중학교 1학년</option>
+                                        <option value="8">중학교 2학년</option>
+                                        <option value="9">중학교 3학년</option>
+                                        <option value="10">고등학교 1학년</option>
+                                        <option value="11">고등학교 2학년</option>
+                                        <option value="12">고등학교 3학년</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="name">학생 이름 <span class="optional">(선택사항)</span></label>
+                                    <input type="text" id="name" name="name" placeholder="예: 이종복">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="student_submission">학생 답안 <span class="optional">(선택사항)</span></label>
+                                <textarea id="student_submission" name="student_submission" rows="8" 
+                                    placeholder="학생이 작성한 답안을 입력해주세요... (입력하지 않으면 루브릭만 생성됩니다)"></textarea>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn-primary" id="submitBtn">
+                                    <i class="fas fa-magic"></i>
+                                    <span id="submitBtnText">루브릭 생성</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="results-section" id="resultsSection" style="display: none;">
+                <div class="results-header">
+                    <div class="results-tabs">
+                        <button class="tab-btn active" data-tab="rubric">
+                            <i class="fas fa-table"></i> 루브릭
+                        </button>
+                        <button class="tab-btn" data-tab="evaluation">
+                            <i class="fas fa-chart-bar"></i> 평가
+                        </button>
+                        <button class="tab-btn" data-tab="feedback">
+                            <i class="fas fa-comments"></i> 피드백
+                        </button>
+                        <button class="tab-btn" data-tab="report">
+                            <i class="fas fa-file-alt"></i> 종합 리포트
+                        </button>
+                    </div>
+                    
+                    <div class="export-buttons">
+                        <button class="export-btn sheets-btn" id="exportSheets">
+                            <i class="fab fa-google"></i> 구글 시트로 내보내기
+                        </button>
+                    </div>
+                </div>
+
+                <div class="tab-content">
+                    <div class="tab-pane active" id="rubric">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-table"></i> 생성된 루브릭</h3>
+                            </div>
+                            <div class="card-body">
+                                <div id="rubricContent" class="content-display"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane" id="evaluation">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-chart-bar"></i> 평가 결과</h3>
+                            </div>
+                            <div class="card-body">
+                                <div id="evaluationContent" class="content-display"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane" id="feedback">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-comments"></i> 상세 피드백</h3>
+                            </div>
+                            <div class="card-body">
+                                <div id="feedbackContent" class="content-display"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane" id="report">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-file-alt"></i> 종합 리포트</h3>
+                            </div>
+                            <div class="card-body">
+                                <div id="reportContent" class="content-display"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 로딩 스피너 -->
+            <div class="loading-overlay" id="loadingOverlay">
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <p>AI가 루브릭을 생성하고 평가하고 있습니다...</p>
+                    <small>이 과정은 30초 정도 소요될 수 있습니다.</small>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

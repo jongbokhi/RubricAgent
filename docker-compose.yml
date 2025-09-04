@@ -1,0 +1,56 @@
+services:
+  # 백엔드 서비스
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: rubric-agent-backend
+    ports:
+      - "8000:8000"  # 개발용 직접 접근
+    environment:
+      - MY_PROJECT=rubric-agent
+      - API_KEY=${OPENAI_API_KEY}
+    env_file:
+      - .env
+    networks:
+      - rubric-network
+
+    develop:
+      watch:
+        - action: rebuild  # 아래 path에 있는 파일이 변경되면 컨테이너 재빌드
+          path: backend/pyproject.toml
+        - action: rebuild
+          path: backend/Dockerfile
+        - action: sync+restart  # sync 명령어는 호스트(내 컴퓨터)의 디렉토리와 컨테이너 내부의 디렉토리를 동기화 한다는 뜻(dockerignore 파일에 있는 파일은 제외)
+          path: backend/src/
+          target: /app/src  # sync 모드에서는 설정해줘야함
+
+  # 프론트엔드 서비스
+  frontend:
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+    container_name: rubric-agent-frontend
+    ports:
+      - "3000:80"  # 프론트엔드 메인 포트
+    depends_on:
+      - backend
+    networks:
+      - rubric-network
+
+    develop:
+      watch:
+        - action: rebuild
+          path: frontend/Dockerfile
+        - action: sync+restart
+          path: frontend/
+          target: /usr/share/nginx/html
+          ignore:
+            - frontend/Dockerfile
+            - frontend/nginx.conf
+
+# 네트워크 설정
+networks:
+  rubric-network:
+    driver: bridge
+    
