@@ -20,7 +20,7 @@ app.add_middleware(
 )
 
 MY_PROJECT = environ.get("MY_PROJECT", "rubric-agent")
-API_KEY = environ.get("API_KEY")
+API_KEY = environ.get("OPENAI_API_KEY")
 
 if not API_KEY:
     print("⚠️ Warning: API_KEY is not set")
