@@ -10,6 +10,12 @@ AI 기반 자동 평가 및 피드백 시스템입니다. LangGraph를 사용하
 - 📋 **종합 리포트**: 평가 결과를 종합한 리포트 생성
 - 🌐 **웹 인터페이스**: 사용자 친화적인 프론트엔드 제공
 
+
+
+# Architecture
+<img width="1205" height="617" alt="image" src="https://github.com/user-attachments/assets/f4405ca8-84f3-4c3c-b711-1744334fb564" />
+
+
 ## 📁 프로젝트 구조
 
 ```
@@ -29,8 +35,8 @@ rubric-agent/
 │   ├── Dockerfile          # 프론트엔드 Docker 설정
 │   └── nginx.conf          # Nginx 설정
 ├── docker-compose.yml
-├── Makefile
 ├── pyproject.toml
-└── .env
+│
+rubric-agent-cdk/
 ```
 
