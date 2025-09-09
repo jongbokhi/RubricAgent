@@ -10,10 +10,22 @@ AI 기반 자동 평가 및 피드백 시스템입니다. LangGraph를 사용하
 - 📋 **종합 리포트**: 평가 결과를 종합한 리포트 생성
 - 🌐 **웹 인터페이스**: 사용자 친화적인 프론트엔드 제공
 
-
+-----
 
 # Architecture
 <img width="1205" height="617" alt="image" src="https://github.com/user-attachments/assets/f4405ca8-84f3-4c3c-b711-1744334fb564" />
+
+## 🔧 백엔드 기술 스택
+
+| 기술 | 용도 |
+|------|------|
+| FastAPI | REST API 서버 |
+| **AI Framework** |**LangChain + LangGraph** - AI 워크플로우 엔진|
+| **LLM** | OpenAI GPT-4.1-mini | 입력 파싱 → 루브릭 생성 → 평가 → 피드백 → 리포트 생성 |
+| **Serverless Adapter** | Mangum | FastAPI를 AWS Lambda로 변환 |
+| **Structured Output and Validation** | Pydantic | AI 응답을 구조화 및 데이터 검증 |
+| **Mangum**  | AWS Lambda 어댑터 |
+| **Docker** | 컨테이너화 |
 
 
 ## 📁 프로젝트 구조
@@ -37,6 +49,6 @@ rubric-agent/
 ├── docker-compose.yml
 ├── pyproject.toml
 │
-rubric-agent-cdk/
+rubric-agent-cdk/          # AWS 배포 Architecture 구성
 ```
 
