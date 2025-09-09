@@ -1,8 +1,3 @@
-from dotenv import load_dotenv
-
-load_dotenv()
-import asyncio
-
 from .state import State
 from .nodes import *
 from .chains import *
@@ -38,7 +33,6 @@ memory_saver = MemorySaver()
 app = workflow.compile(checkpointer=memory_saver)
 
 
-
 async def response(teacher_input: str, thread_id: str) -> State:
 
     config = RunnableConfig(
@@ -47,7 +41,7 @@ async def response(teacher_input: str, thread_id: str) -> State:
     )
 
     inputs = {"teacher_input": teacher_input}
-    
+
     results = app.invoke(inputs, config=config)
 
     return results

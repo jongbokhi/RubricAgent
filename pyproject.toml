@@ -11,6 +11,7 @@ dependencies = [
     "langchain-google-genai>=2.1.10",
     "langchain-teddynote>=0.4.4",
     "langgraph>=0.6.6",
+    "mangum>=0.19.0",
     "pydantic>=2.11.7",
     "python-dotenv>=1.1.1",
     "uvicorn[standard]>=0.35.0",

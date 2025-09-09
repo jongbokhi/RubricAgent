@@ -3,9 +3,11 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from .rubric import response
-import asyncio
+from mangum import Mangum
+# Wrap the entire FastAPI app and it turning into a lambda function
 
 app = FastAPI(title="Rubric Agent API", version="1.0.0")
+handler = Mangum(app)
 
 # CORS 설정 - 프론트엔드 컨테이너에서 접근 허용
 app.add_middleware(
@@ -20,10 +22,11 @@ app.add_middleware(
 )
 
 MY_PROJECT = environ.get("MY_PROJECT", "rubric-agent")
-API_KEY = environ.get("OPENAI_API_KEY")
+API_KEY = environ.get("yourapikey")
 
 if not API_KEY:
     print("⚠️ Warning: API_KEY is not set")
+    # Lambda에서는 환경 변수를 직접 설정해야 함
 
 
 class RubricRequest(BaseModel):

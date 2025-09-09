@@ -1,42 +1,37 @@
-# 1) Base image
-FROM python:3.12-slim
+# Use uv image for first stage
+FROM ghcr.io/astral-sh/uv:0.8.15 AS uv
 
-# 2) 필수 도구 설치 + 이미지 슬림화
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl ca-certificates \
-  && rm -rf /var/lib/apt/lists/*
+# First stage: Build dependencies
+FROM public.ecr.aws/lambda/python:3.12 AS builder
 
+# Enable bytecode compilation to improve cold-start performance
+ENV UV_COMPILE_BYTECODE=1
 
-# 3) uv 설치
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh
-ENV PATH="/root/.local/bin:$PATH"
+# Disable installer metadata to create a deterministic layer
+ENV UV_NO_INSTALLER_METADATA=1
 
-# 4) 작업 디렉토리
-WORKDIR /app
+# Enable copy mode to support bind mount caching
+ENV UV_LINK_MODE=copy
 
-# 5) 의존성 관련 파일만 먼저 복사 (레이어 캐시 최적화)
-#   - backend 폴더 구조라면 pyproject/lock을 정확히 지정해서 복사
-COPY ./pyproject.toml ./pyproject.toml
-# uv.lock이 있다면 함께 복사 (없으면 생략)
-COPY ./uv.lock ./uv.lock
+# Bundle the dependencies into the Lambda task root via `uv pip install --target`
+# Omit any local packages (`--no-emit-workspace`) and development dependencies (`--no-dev`)
+# This ensures that the Docker layer cache is only invalidated when the `pyproject.toml` or `uv.lock`
+# files change, but remains robust to changes in the application code
+RUN --mount=from=uv,source=/uv,target=/bin/uv \
+    --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv export --frozen --no-emit-workspace --no-dev --no-editable -o requirements.txt && \
+    uv pip install -r requirements.txt --target "${LAMBDA_TASK_ROOT}"
 
-# 6) uv 가상환경 경로를 지정하고 PATH 우선 등록
-#    (기본은 프로젝트 루트의 .venv, 필요시 다른 경로도 가능)
-ENV UV_PROJECT_ENVIRONMENT=".venv"
-ENV VIRTUAL_ENV="/app/.venv"
-ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+# Second stage: Final runtime image
+FROM public.ecr.aws/lambda/python:3.12
 
-# 7) 의존성 동기화
-#    --frozen/--locked: lockfile이 반드시 맞아야 설치 (CI/CD 재현성 ↑)
-#    lockfile이 없다면 --locked 대신 생략하고 --no-cache를 고려
-RUN uv sync --frozen
+# Copy the runtime dependencies from the builder stage
+COPY --from=builder ${LAMBDA_TASK_ROOT} ${LAMBDA_TASK_ROOT}
 
-# 8) 애플리케이션 소스 복사
-COPY ./backend/src ./src
+# Copy the application code (src -> src in the container)
+COPY ./backend/src ${LAMBDA_TASK_ROOT}/src
 
-# 9) 포트 노출
-EXPOSE 8000
-
-# 10) 앱 실행 (가상환경 경로가 PATH에 있어 python/uvicorn 바로 사용 가능)
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
-
+# Set the AWS Lambda handler (pointing to our FastAPI app wrapped with Mangum)
+CMD ["src.main.handler"]

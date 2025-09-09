@@ -9,7 +9,7 @@ services:
       - "8000:8000"  # 개발용 직접 접근
     environment:
       - MY_PROJECT=rubric-agent
-      - API_KEY=${OPENAI_API_KEY}
+      - API_KEY=${yourapikey}
     env_file:
       - .env
     networks:

@@ -1,5 +1,5 @@
-// API 설정 - 프록시를 통해 백엔드에 접근
-const API_BASE_URL = '/api';
+// API 설정 - 설정 파일에서 가져오기
+const API_BASE_URL = window.RUBRIC_CONFIG ? window.RUBRIC_CONFIG.API_BASE_URL : '/api';
 
 // DOM 요소들
 const form = document.getElementById('rubricForm');
